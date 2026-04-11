@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Ответ маме</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
+
+    label.upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #c0c9d8;
+      border-radius: 12px;
+      padding: 28px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+    }
+
+    label.upload-area:hover, label.upload-area.drag-over {
+      border-color: #25d366;
+      background: #f0fff5;
+    }
+
+    label.upload-area .icon { font-size: 2rem; margin-bottom: 8px; }
+    label.upload-area .main-text { font-size: 0.95rem; font-weight: 600; color: #333; }
+    label.upload-area .sub-text { font-size: 0.78rem; color: #999; margin-top: 4px; }
+
+    input[type="file"] { display: none; }
+
+    #preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    #preview img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .context-label {
+      font-size: 0.82rem;
+      color: #555;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      border: 1.5px solid #dde2ea;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      resize: none;
+      line-height: 1.5;
+      color: #222;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: #25d366; }
+
+    button#submit {
+      width: 100%;
+      max-width: 480px;
+      background: #25d366;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 16px;
+    }
+
+    button#submit:active { transform: scale(0.98); }
+    button#submit:disabled { background: #aad5b8; cursor: default; }
+
+    #loading {
+      display: none;
+      text-align: center;
+      color: #25d366;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border: 3px solid #c8f0d8;
+      border-top-color: #25d366;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #results { width: 100%; max-width: 480px; }
+
+    .reply-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .reply-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #1a1a1a;
+      line-height: 1.55;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      background: #f0f4f8;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #444;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:active { background: #d5f0e0; color: #25d366; }
+    .copy-btn.copied { background: #d5f0e0; color: #25d366; }
+
+    #error {
+      display: none;
+      background: #fff0f0;
+      border: 1px solid #f5c6c6;
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #c0392b;
+      font-size: 0.88rem;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>💬 Ответ маме</h1>
+  <p class="subtitle">Загрузи скриншот WhatsApp — получи 3 варианта ответа</p>
+
+  <div class="card">
+    <label class="upload-area" id="dropZone" for="fileInput">
+      <span class="icon">📸</span>
+      <span class="main-text">Выбери скриншот(ы)</span>
+      <span class="sub-text">JPEG или PNG · можно несколько</span>
+    </label>
+    <input type="file" id="fileInput" accept="image/*" multiple />
+    <div id="preview"></div>
+  </div>
+
+  <div class="card">
+    <label class="context-label" for="contextInput">Дополнительный контекст (необязательно)</label>
+    <textarea id="contextInput" rows="2" placeholder="Например: мама спрашивает про праздник на следующей неделе"></textarea>
+  </div>
+
+  <button id="submit" disabled>Придумать ответы</button>
+
+  <div id="loading"><span class="spinner"></span>Анализирую сообщения…</div>
+  <div id="error"></div>
+  <div id="results"></div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const submitBtn = document.getElementById('submit');
+    const loading = document.getElementById('loading');
+    const results = document.getElementById('results');
+    const errorBox = document.getElementById('error');
+    const dropZone = document.getElementById('dropZone');
+    const contextInput = document.getElementById('contextInput');
+
+    let selectedFiles = [];
+
+    fileInput.addEventListener('change', () => {
+      selectedFiles = Array.from(fileInput.files);
+      renderPreviews();
+    });
+
+    // Drag & drop
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      selectedFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+      renderPreviews();
+    });
+
+    function renderPreviews() {
+      preview.innerHTML = '';
+      selectedFiles.forEach(file => {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+      submitBtn.disabled = selectedFiles.length === 0;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+      if (selectedFiles.length === 0) return;
+
+      submitBtn.disabled = true;
+      loading.style.display = 'block';
+      results.innerHTML = '';
+      errorBox.style.display = 'none';
+
+      const form = new FormData();
+      selectedFiles.forEach(f => form.append('images', f));
+      form.append('context', contextInput.value);
+
+      try {
+        const res = await fetch('/analyze', { method: 'POST', body: form });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.detail || 'Ошибка сервера');
+
+        data.replies.forEach(reply => {
+          const card = document.createElement('div');
+          card.className = 'reply-card';
+
+          const text = document.createElement('div');
+          text.className = 'reply-text';
+          text.textContent = reply;
+
+          const btn = document.createElement('button');
+          btn.className = 'copy-btn';
+          btn.textContent = 'Копировать';
+          btn.addEventListener('click', () => {
+            navigator.clipboard.writeText(reply).then(() => {
+              btn.textContent = 'Скопировано!';
+              btn.classList.add('copied');
+              setTimeout(() => { btn.textContent = 'Копировать'; btn.classList.remove('copied'); }, 2000);
+            });
+          });
+
+          card.appendChild(text);
+          card.appendChild(btn);
+          results.appendChild(card);
+        });
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+      } finally {
+        loading.style.display = 'none';
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
