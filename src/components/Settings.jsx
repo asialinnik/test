@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Settings({ apiKey, goal, onSave, onClose }) {
+export default function Settings({ apiKey, goal, micSide = 'right', onMicSideChange, onSave, onClose }) {
   const [key, setKey] = useState(apiKey || '')
   const [goalValue, setGoalValue] = useState(String(goal))
   const [error, setError] = useState('')
@@ -45,6 +45,26 @@ export default function Settings({ apiKey, goal, onSave, onClose }) {
               min="0"
             />
             <span className="text-sm text-slate-400 flex-shrink-0">kcal</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <label className="text-sm font-bold text-slate-700 block mb-1">Mic button position</label>
+          <p className="text-xs text-slate-400 mb-3">Which corner the floating mic button sits in.</p>
+          <div className="flex gap-2">
+            {['left', 'right'].map(s => (
+              <button
+                key={s}
+                onClick={() => onMicSideChange?.(s)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-colors ${
+                  micSide === s
+                    ? 'bg-[#5f7c66] text-white'
+                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
         </div>
 

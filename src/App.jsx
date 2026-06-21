@@ -31,6 +31,12 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [bgImage, setBgImage] = useState(null)
+  const [micSide, setMicSide] = useState(() => loadFromStorage('vct-mic-side', 'right'))
+
+  const handleMicSideChange = (s) => {
+    localStorage.setItem('vct-mic-side', JSON.stringify(s))
+    setMicSide(s)
+  }
 
   useEffect(() => {
     localStorage.setItem(`vct-day-${today}`, JSON.stringify(entries))
@@ -143,6 +149,8 @@ export default function App() {
       <Settings
         apiKey={apiKey}
         goal={goal}
+        micSide={micSide}
+        onMicSideChange={handleMicSideChange}
         onSave={handleSaveSettings}
         onClose={() => setShowSettings(false)}
       />
@@ -248,11 +256,19 @@ export default function App() {
             <div className="text-xs text-slate-400 mt-1">fat</div>
           </div>
         </div>
+        {entries.length > 0 && (
+          <button
+            onClick={handleCloseDay}
+            className="w-full mt-3 py-1.5 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
+          >
+            Close & Save Day
+          </button>
+        )}
         </div>
       </div>
 
       {/* Food Log */}
-      <div className="flex-1 py-3 pb-4">
+      <div className="flex-1 py-3 pb-28">
         {entries.length === 0 && !isLoading && (
           <div className="text-center text-slate-500 mt-20 px-4">
             <p className="text-base font-medium">these are the good days</p>
@@ -279,20 +295,8 @@ export default function App() {
         <FoodLog entries={entries} onDelete={handleDeleteEntry} onEdit={handleEditEntry} />
       </div>
 
-      {/* Bottom Actions — pinned to bottom while scrolling */}
-      <div className="sticky bottom-0 z-20 -mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3">
-        <div className="bg-white shadow-sm px-5 py-4 space-y-2.5 rounded-3xl">
-        <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
-        {entries.length > 0 && (
-          <button
-            onClick={handleCloseDay}
-            className="w-full py-1.5 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
-          >
-            Close & Save Day
-          </button>
-        )}
-        </div>
-      </div>
+      {/* Floating mic button */}
+      <VoiceButton onResult={handleVoiceResult} disabled={isLoading} side={micSide} />
     </div>
   )
 }
