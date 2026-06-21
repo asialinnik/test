@@ -3,7 +3,10 @@ import VoiceButton from './components/VoiceButton.jsx'
 import FoodLog from './components/FoodLog.jsx'
 import DayHistory from './components/DayHistory.jsx'
 import ApiKeySetup from './components/ApiKeySetup.jsx'
+import Settings from './components/Settings.jsx'
 import { parseFood } from './utils/parseFood.js'
+
+const DEFAULT_GOAL = 1850
 
 const getToday = () => new Date().toISOString().split('T')[0]
 
@@ -16,17 +19,9 @@ const loadFromStorage = (key, fallback) => {
   }
 }
 
-function MacroBadge({ label, value, colorClass }) {
-  return (
-    <div className={`flex flex-col items-center px-4 py-2 rounded-2xl ${colorClass}`}>
-      <span className="text-lg font-bold tabular-nums">{value}</span>
-      <span className="text-xs font-medium opacity-70 mt-0.5">{label}</span>
-    </div>
-  )
-}
-
 export default function App() {
   const [apiKey, setApiKey] = useState(() => loadFromStorage('vct-api-key', ''))
+  const [goal, setGoal] = useState(() => loadFromStorage('vct-goal', DEFAULT_GOAL))
   const [today] = useState(getToday)
   const [entries, setEntries] = useState(() => loadFromStorage(`vct-day-${getToday()}`, []))
   const [history, setHistory] = useState(() => loadFromStorage('vct-history', []))
@@ -49,9 +44,19 @@ export default function App() {
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
   )
 
+  const remaining = goal - totals.calories
+  const progressPct = goal > 0 ? Math.min((totals.calories / goal) * 100, 100) : 0
+
   const handleSaveApiKey = (key) => {
     localStorage.setItem('vct-api-key', JSON.stringify(key))
     setApiKey(key)
+  }
+
+  const handleSaveSettings = ({ apiKey: key, goal: newGoal }) => {
+    localStorage.setItem('vct-api-key', JSON.stringify(key))
+    localStorage.setItem('vct-goal', JSON.stringify(newGoal))
+    setApiKey(key)
+    setGoal(newGoal)
     setShowSettings(false)
   }
 
@@ -114,8 +119,19 @@ export default function App() {
     day: 'numeric',
   })
 
-  if (!apiKey || showSettings) {
+  if (!apiKey) {
     return <ApiKeySetup onSave={handleSaveApiKey} />
+  }
+
+  if (showSettings) {
+    return (
+      <Settings
+        apiKey={apiKey}
+        goal={goal}
+        onSave={handleSaveSettings}
+        onClose={() => setShowSettings(false)}
+      />
+    )
   }
 
   if (showHistory) {
@@ -123,11 +139,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-purple-50 flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-[#faf9fc] flex flex-col max-w-md mx-auto">
       {/* Header */}
       <div className="bg-white border-b border-slate-100 px-5 pt-safe-top py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-base font-semibold text-slate-800">Today</h1>
+          <h1 className="text-base font-bold text-slate-800">Today</h1>
           <p className="text-xs text-slate-400">{todayLabel}</p>
         </div>
         <div className="flex items-center gap-1">
@@ -180,16 +196,48 @@ export default function App() {
       </div>
 
       {/* Calorie Total */}
-      <div className="bg-white px-5 pt-6 pb-5 border-b border-slate-100 text-center">
-        <div className="text-6xl font-bold text-slate-800 tabular-nums tracking-tight">
-          {totals.calories.toLocaleString()}
+      <div className="bg-white px-5 pt-5 pb-5 border-b border-slate-100">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
+              {totals.calories.toLocaleString()}
+            </div>
+            <div className="text-xs text-slate-400 mt-1.5 font-medium">
+              of {goal.toLocaleString()} kcal
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-slate-700 tabular-nums leading-none">
+              {Math.abs(remaining).toLocaleString()}
+            </div>
+            <div className="text-xs text-slate-400 mt-1.5 font-medium">
+              {remaining >= 0 ? 'left' : 'over'}
+            </div>
+          </div>
         </div>
-        <div className="text-sm text-slate-400 mt-1 font-medium">calories today</div>
 
-        <div className="flex justify-center gap-3 mt-5">
-          <MacroBadge label="Protein" value={`${totals.protein}g`} colorClass="bg-sky-50 text-sky-600" />
-          <MacroBadge label="Carbs" value={`${totals.carbs}g`} colorClass="bg-violet-100 text-violet-600" />
-          <MacroBadge label="Fat" value={`${totals.fat}g`} colorClass="bg-indigo-50 text-indigo-500" />
+        {/* Progress bar */}
+        <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${remaining >= 0 ? 'bg-green-600/70' : 'bg-violet-400'}`}
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+
+        {/* Macros: protein emphasized, carbs/fat quiet */}
+        <div className="flex items-center gap-3 mt-4">
+          <div className="flex-1 bg-sky-50 rounded-2xl px-4 py-2.5">
+            <div className="text-lg font-bold text-sky-600 tabular-nums leading-none">{totals.protein}g</div>
+            <div className="text-xs text-sky-500/70 mt-1 font-medium">protein</div>
+          </div>
+          <div className="text-center px-2">
+            <div className="text-sm font-semibold text-slate-500 tabular-nums leading-none">{totals.carbs}g</div>
+            <div className="text-xs text-slate-400 mt-1">carbs</div>
+          </div>
+          <div className="text-center px-2">
+            <div className="text-sm font-semibold text-slate-500 tabular-nums leading-none">{totals.fat}g</div>
+            <div className="text-xs text-slate-400 mt-1">fat</div>
+          </div>
         </div>
       </div>
 

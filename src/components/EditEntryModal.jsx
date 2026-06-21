@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function EditEntryModal({ entry, onSave, onClose }) {
+export default function EditEntryModal({ entry, onSave, onDelete, onClose }) {
   const [calories, setCalories] = useState(String(entry.calories))
   const [protein, setProtein] = useState(String(entry.protein))
   const [carbs, setCarbs] = useState(String(entry.carbs))
@@ -66,6 +66,13 @@ export default function EditEntryModal({ entry, onSave, onClose }) {
             Save
           </button>
         </div>
+
+        <button
+          onClick={onDelete}
+          className="w-full mt-2 py-2.5 text-sm font-medium text-slate-400 hover:text-violet-600 rounded-2xl"
+        >
+          Delete entry
+        </button>
       </div>
     </div>
   )
