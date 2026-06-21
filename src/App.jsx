@@ -5,6 +5,7 @@ import DayHistory from './components/DayHistory.jsx'
 import ApiKeySetup from './components/ApiKeySetup.jsx'
 import Settings from './components/Settings.jsx'
 import { parseFood } from './utils/parseFood.js'
+import { gradientScenes, dayIndex, loadUserImages } from './utils/backgrounds.js'
 
 const DEFAULT_GOAL = 1850
 
@@ -29,10 +30,24 @@ export default function App() {
   const [error, setError] = useState('')
   const [showHistory, setShowHistory] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [bgImage, setBgImage] = useState(null)
 
   useEffect(() => {
     localStorage.setItem(`vct-day-${today}`, JSON.stringify(entries))
   }, [entries, today])
+
+  // Pick today's background: a user photo if any are configured, else a gradient.
+  useEffect(() => {
+    let cancelled = false
+    loadUserImages().then(images => {
+      if (cancelled || images.length === 0) return
+      const file = images[dayIndex(images.length)]
+      setBgImage(`/backgrounds/${file}`)
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  const gradient = gradientScenes[dayIndex(gradientScenes.length)]
 
   const totals = entries.reduce(
     (acc, e) => ({
@@ -139,9 +154,24 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#e8ebe6] flex flex-col max-w-md mx-auto">
+    <div className="relative min-h-screen flex flex-col max-w-md mx-auto">
+      {/* Background: today's photo (or gradient), softened behind a hazy scrim */}
+      <div className="fixed inset-0 -z-10">
+        {bgImage ? (
+          <img
+            src={bgImage}
+            alt=""
+            onError={() => setBgImage(null)}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full" style={{ background: gradient }} />
+        )}
+        <div className="absolute inset-0 bg-[#e8ebe6]/60 backdrop-blur-[2px]" />
+      </div>
+
       {/* Header */}
-      <div className="bg-white border-b border-slate-100 px-5 pt-safe-top py-4 flex items-center justify-between">
+      <div className="bg-white/70 backdrop-blur-md border-b border-white/40 px-5 pt-safe-top py-4 flex items-center justify-between">
         <div>
           <h1 className="text-base font-bold text-slate-800">Today</h1>
           <p className="text-xs text-slate-400">{todayLabel}</p>
@@ -196,7 +226,7 @@ export default function App() {
       </div>
 
       {/* Calorie Total */}
-      <div className="bg-white px-5 pt-5 pb-5 border-b border-slate-100">
+      <div className="bg-white/70 backdrop-blur-md px-5 pt-5 pb-5 border-b border-white/40">
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
@@ -256,7 +286,7 @@ export default function App() {
         )}
 
         {isLoading && (
-          <div className="flex items-center gap-3 bg-white rounded-2xl p-4 mb-2 shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 bg-white/75 backdrop-blur-md rounded-2xl p-4 mb-2 shadow-sm border border-white/50">
             <div className="flex gap-1 items-center">
               <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
               <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
@@ -267,7 +297,7 @@ export default function App() {
         )}
 
         {error && (
-          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-4 mb-2 text-violet-700 text-sm">
+          <div className="bg-violet-50/80 backdrop-blur-md border border-violet-100 rounded-2xl p-4 mb-2 text-violet-700 text-sm">
             {error}
           </div>
         )}
@@ -276,7 +306,7 @@ export default function App() {
       </div>
 
       {/* Bottom Actions */}
-      <div className="bg-white border-t border-slate-100 px-5 py-4 space-y-2.5 pb-safe-bottom">
+      <div className="bg-white/70 backdrop-blur-md border-t border-white/40 px-5 py-4 space-y-2.5 pb-safe-bottom">
         <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
         {entries.length > 0 && (
           <button
