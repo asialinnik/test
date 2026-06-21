@@ -24,7 +24,10 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
 
   const recRef = useRef(null)
   const finalRef = useRef('')
+  const silenceRef = useRef(null) // auto-stop timer after a pause in speech
   const dragRef = useRef(null) // { startX, startY, originX, originY, moved }
+
+  const SILENCE_MS = 3000 // stop this long after the last words are heard
 
   const SpeechRecognition =
     typeof window !== 'undefined'
@@ -32,8 +35,18 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
       : null
 
   useEffect(() => {
-    return () => recRef.current?.abort()
+    return () => {
+      clearTimeout(silenceRef.current)
+      recRef.current?.abort()
+    }
   }, [])
+
+  const armSilenceTimer = () => {
+    clearTimeout(silenceRef.current)
+    silenceRef.current = setTimeout(() => {
+      recRef.current?.stop()
+    }, SILENCE_MS)
+  }
 
   // Keep the button on-screen if the viewport size changes (e.g. rotation).
   useEffect(() => {
@@ -67,6 +80,7 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
     rec.onstart = () => {
       setStatus('listening')
       setLiveText('')
+      armSilenceTimer()
     }
 
     rec.onresult = e => {
@@ -79,9 +93,11 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
       }
       if (final) finalRef.current += final
       setLiveText(finalRef.current || interim)
+      armSilenceTimer() // heard something — restart the silence countdown
     }
 
     rec.onend = () => {
+      clearTimeout(silenceRef.current)
       setStatus('idle')
       const result = finalRef.current.trim()
       setLiveText('')
@@ -90,6 +106,7 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
 
     rec.onerror = e => {
       if (e.error !== 'no-speech') console.error('Speech error:', e.error)
+      clearTimeout(silenceRef.current)
       setStatus('idle')
       setLiveText('')
     }
@@ -99,6 +116,7 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
   }
 
   const stopListening = () => {
+    clearTimeout(silenceRef.current)
     recRef.current?.stop()
   }
 
