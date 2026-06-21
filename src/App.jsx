@@ -154,7 +154,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#b9c5b0] flex flex-col max-w-md mx-auto px-3">
+    <div className="h-[100dvh] bg-[#b9c5b0] flex flex-col max-w-md mx-auto px-3 overflow-hidden">
 
       {/* Photo banner card — image at top of the stack */}
       <div className="relative h-44 mt-3 rounded-3xl overflow-hidden shadow-sm">

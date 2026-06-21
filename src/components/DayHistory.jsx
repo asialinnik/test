@@ -43,10 +43,10 @@ export default function DayHistory({ history, onBack }) {
                 <span className="text-xs font-medium text-[#4e74a0] bg-[#e8eef2] px-2 py-0.5 rounded-full tabular-nums">
                   {day.totals.protein}g P
                 </span>
-                <span className="text-xs font-medium text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full tabular-nums">
+                <span className="text-xs font-medium text-[#9d8fc7] bg-[#efecf7] px-2 py-0.5 rounded-full tabular-nums">
                   {day.totals.carbs}g C
                 </span>
-                <span className="text-xs font-medium text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full tabular-nums">
+                <span className="text-xs font-medium text-[#aaa3d4] bg-[#f0eef8] px-2 py-0.5 rounded-full tabular-nums">
                   {day.totals.fat}g F
                 </span>
               </div>

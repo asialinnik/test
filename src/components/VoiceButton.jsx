@@ -82,7 +82,7 @@ export default function VoiceButton({ onResult, disabled }) {
             ? 'bg-violet-500 text-white shadow-lg shadow-violet-200 scale-[0.98]'
             : disabled
             ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-            : 'bg-green-700 text-white shadow-lg shadow-green-900/20 active:scale-95'
+            : 'bg-[#5f7c66] text-white shadow-lg shadow-green-900/20 active:scale-95'
           }
         `}
       >
