@@ -168,8 +168,8 @@ export default function App() {
         ) : (
           <div className="w-full h-full" style={{ background: gradient }} />
         )}
-        {/* Hazy veil — softens the photo's color intensity */}
-        <div className="absolute inset-0 bg-white/30 backdrop-blur-[1px]" />
+        {/* Greyish overlay — tones down the photo, no blur */}
+        <div className="absolute inset-0 bg-slate-500/25" />
         {/* Gradient scrim so text is always readable */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
 
