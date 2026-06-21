@@ -18,7 +18,7 @@ export default function ApiKeySetup({ onSave }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 max-w-sm mx-auto">
+    <div className="min-h-screen bg-[#e8ebe6] flex flex-col items-center justify-center p-6 max-w-sm mx-auto">
       <div className="w-20 h-20 bg-violet-100 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
         <span className="text-4xl">🎤</span>
       </div>
@@ -40,7 +40,7 @@ export default function ApiKeySetup({ onSave }) {
           onChange={e => { setKey(e.target.value); setError('') }}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="sk-ant-api03-..."
-          className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 font-mono bg-slate-50"
+          className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 font-mono bg-[#e8ebe6]"
           autoComplete="off"
           autoCapitalize="none"
         />

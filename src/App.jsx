@@ -139,7 +139,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9fc] flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-[#e8ebe6] flex flex-col max-w-md mx-auto">
       {/* Header */}
       <div className="bg-white border-b border-slate-100 px-5 pt-safe-top py-4 flex items-center justify-between">
         <div>

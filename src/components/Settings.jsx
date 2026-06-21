@@ -15,7 +15,7 @@ export default function Settings({ apiKey, goal, onSave, onClose }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9fc] flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-[#e8ebe6] flex flex-col max-w-md mx-auto">
       <div className="bg-white/80 backdrop-blur border-b border-slate-100 px-5 py-4 flex items-center gap-3 sticky top-0 z-10">
         <button
           onClick={onClose}
