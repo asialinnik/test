@@ -362,7 +362,7 @@ export default function App() {
               onClick={handleCloseDay}
               className="text-slate-400 text-xs font-medium hover:text-slate-600 active:scale-95 transition-all px-3 py-1"
             >
-              Save day &amp; start fresh
+              Save
             </button>
             <p className="text-[10px] text-slate-400/70 mt-1">Auto-saves at midnight</p>
           </div>
