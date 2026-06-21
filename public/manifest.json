@@ -4,8 +4,8 @@
   "description": "Track calories by speaking what you ate",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#10b981",
+  "background_color": "#b9c5b0",
+  "theme_color": "#5f7c66",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -15,7 +15,8 @@
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

@@ -1,4 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#10b981"/>
-  <text y=".9em" font-size="80" x="10">🎤</text>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6e8f76"/>
+      <stop offset="1" stop-color="#4a6652"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="url(#g)"/>
+  <!-- macro ring: carbs (green), protein (blue), fat (purple) -->
+  <circle cx="50" cy="50" r="28" fill="none" stroke="#8fba8f" stroke-width="11"
+    stroke-dasharray="52 124" stroke-dashoffset="0"/>
+  <circle cx="50" cy="50" r="28" fill="none" stroke="#8fb4d4" stroke-width="11"
+    stroke-dasharray="41 135" stroke-dashoffset="-52"/>
+  <circle cx="50" cy="50" r="28" fill="none" stroke="#b49ac8" stroke-width="11"
+    stroke-dasharray="28 148" stroke-dashoffset="-93"/>
+  <circle cx="50" cy="50" r="18" fill="url(#g)"/>
 </svg>
