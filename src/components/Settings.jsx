@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Settings({ apiKey, goal, micSide = 'right', onMicSideChange, onSave, onClose }) {
+export default function Settings({ apiKey, goal, micSide = 'right', onMicSideChange, onSave, onClose, onSignOut, userEmail }) {
   const [key, setKey] = useState(apiKey || '')
   const [goalValue, setGoalValue] = useState(String(goal))
   const [error, setError] = useState('')
@@ -70,7 +70,7 @@ export default function Settings({ apiKey, goal, micSide = 'right', onMicSideCha
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
           <label className="text-sm font-bold text-slate-700 block mb-1">Anthropic API Key</label>
-          <p className="text-xs text-slate-400 mb-3">Stored only on this device. Used to understand your food descriptions.</p>
+          <p className="text-xs text-slate-400 mb-3">Used to understand your food descriptions. Synced privately to your account so you don't have to re-enter it on each device.</p>
           <input
             type="password"
             value={key}
@@ -89,6 +89,19 @@ export default function Settings({ apiKey, goal, micSide = 'right', onMicSideCha
         >
           Save
         </button>
+
+        {onSignOut && (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <label className="text-sm font-bold text-slate-700 block mb-1">Account</label>
+            {userEmail && <p className="text-xs text-slate-400 mb-3">Signed in as {userEmail}. Your data syncs across devices.</p>}
+            <button
+              onClick={onSignOut}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold bg-slate-50 text-slate-500 hover:bg-slate-100 active:scale-95 transition-all"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

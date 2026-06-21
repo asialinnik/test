@@ -1,11 +1,14 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import VoiceButton from './components/VoiceButton.jsx'
 import FoodLog from './components/FoodLog.jsx'
 import DayHistory from './components/DayHistory.jsx'
 import ApiKeySetup from './components/ApiKeySetup.jsx'
 import Settings from './components/Settings.jsx'
+import Login from './components/Login.jsx'
 import { parseFood } from './utils/parseFood.js'
 import { gradientScenes, dayIndex, loadUserImages } from './utils/backgrounds.js'
+import { supabase, isSupabaseConfigured } from './lib/supabase.js'
+import { pullRemote, pushRemote } from './lib/sync.js'
 
 const DEFAULT_GOAL = 1850
 
@@ -50,6 +53,21 @@ const archiveInto = (history, dateStr, dayEntries) => {
   return [record, ...history.filter(h => h.date !== dateStr)]
 }
 
+const SUPA_ON = isSupabaseConfigured()
+
+// Signature of the syncable state (everything except the timestamp) so we can
+// tell whether anything actually changed and avoid redundant cloud writes.
+const blobSignature = (b) =>
+  JSON.stringify({
+    apiKey: b.apiKey,
+    goal: b.goal,
+    history: b.history,
+    currentDate: b.currentDate,
+    currentEntries: b.currentEntries,
+    micSide: b.micSide,
+    lang: b.lang,
+  })
+
 export default function App() {
   const [apiKey, setApiKey] = useState(() => loadFromStorage('vct-api-key', ''))
   const [goal, setGoal] = useState(() => loadFromStorage('vct-goal', DEFAULT_GOAL))
@@ -63,6 +81,13 @@ export default function App() {
   const [bgImage, setBgImage] = useState(null)
   const [micSide, setMicSide] = useState(() => loadFromStorage('vct-mic-side', 'right'))
   const [lang, setLang] = useState(() => loadFromStorage('vct-lang', 'en-US'))
+
+  // --- Auth / cloud sync ---
+  const [session, setSession] = useState(null)
+  const [authReady, setAuthReady] = useState(!SUPA_ON)   // no Supabase => ready immediately
+  const [initialSync, setInitialSync] = useState(!SUPA_ON) // first cloud pull done?
+  const lastSyncedRef = useRef(null) // signature of last blob synced
+  const pushTimerRef = useRef(null)
 
   const handleMicSideChange = (s) => {
     localStorage.setItem('vct-mic-side', JSON.stringify(s))
@@ -122,6 +147,117 @@ export default function App() {
     const interval = setInterval(tick, 30000)
     return () => clearInterval(interval)
   }, [today])
+
+  // Collect all syncable state into one blob.
+  const gatherBlob = useCallback(() => ({
+    apiKey,
+    goal,
+    history,
+    currentDate: today,
+    currentEntries: entries,
+    micSide,
+    lang,
+    updatedAt: Date.now(),
+  }), [apiKey, goal, history, today, entries, micSide, lang])
+
+  // Apply a blob pulled from the cloud to local state + storage.
+  const applyBlob = useCallback((blob) => {
+    if (typeof blob.apiKey === 'string') {
+      setApiKey(blob.apiKey)
+      localStorage.setItem('vct-api-key', JSON.stringify(blob.apiKey))
+    }
+    if (typeof blob.goal === 'number') {
+      setGoal(blob.goal)
+      localStorage.setItem('vct-goal', JSON.stringify(blob.goal))
+    }
+    let history2 = Array.isArray(blob.history) ? blob.history : []
+    const now = getToday()
+    if (blob.currentDate === now && Array.isArray(blob.currentEntries)) {
+      setEntries(blob.currentEntries)
+      localStorage.setItem(`vct-day-${now}`, JSON.stringify(blob.currentEntries))
+    } else if (blob.currentDate && Array.isArray(blob.currentEntries) && blob.currentEntries.length) {
+      // The cloud's "current day" is in the past — archive it into history.
+      history2 = archiveInto(history2, blob.currentDate, blob.currentEntries)
+    }
+    setHistory(history2)
+    localStorage.setItem('vct-history', JSON.stringify(history2))
+    if (blob.micSide) { setMicSide(blob.micSide); localStorage.setItem('vct-mic-side', JSON.stringify(blob.micSide)) }
+    if (blob.lang) { setLang(blob.lang); localStorage.setItem('vct-lang', JSON.stringify(blob.lang)) }
+    localStorage.setItem('vct-updated-at', JSON.stringify(blob.updatedAt || Date.now()))
+    // Mark as already-synced so the change-watcher below doesn't echo it back.
+    lastSyncedRef.current = blobSignature({ ...blob, history: history2, currentDate: now, currentEntries: blob.currentDate === now ? blob.currentEntries : [] })
+  }, [])
+
+  // Track the auth session.
+  useEffect(() => {
+    if (!SUPA_ON) return
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setAuthReady(true)
+    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  // On sign-in: reconcile cloud vs local (last-write-wins by timestamp).
+  useEffect(() => {
+    if (!SUPA_ON || !session) return
+    let cancelled = false
+    ;(async () => {
+      const remote = await pullRemote(session.user.id)
+      if (cancelled) return
+      const localUpdated = loadFromStorage('vct-updated-at', 0)
+      if (remote && (remote.updatedAt || 0) >= localUpdated) {
+        applyBlob(remote)
+      } else {
+        const blob = gatherBlob()
+        lastSyncedRef.current = blobSignature(blob)
+        localStorage.setItem('vct-updated-at', JSON.stringify(blob.updatedAt))
+        await pushRemote(session.user.id, blob)
+      }
+      setInitialSync(true)
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+
+  // Push local changes to the cloud (debounced), skipping no-op echoes.
+  useEffect(() => {
+    if (!SUPA_ON || !session || !initialSync) return
+    const blob = gatherBlob()
+    if (blobSignature(blob) === lastSyncedRef.current) return
+    clearTimeout(pushTimerRef.current)
+    pushTimerRef.current = setTimeout(() => {
+      lastSyncedRef.current = blobSignature(blob)
+      localStorage.setItem('vct-updated-at', JSON.stringify(blob.updatedAt))
+      pushRemote(session.user.id, blob)
+    }, 800)
+    return () => clearTimeout(pushTimerRef.current)
+  }, [session, initialSync, gatherBlob])
+
+  // Pull fresh data when the app regains focus (catch the other device's edits).
+  useEffect(() => {
+    if (!SUPA_ON || !session) return
+    const refresh = async () => {
+      if (document.hidden) return
+      const remote = await pullRemote(session.user.id)
+      if (remote && (remote.updatedAt || 0) > loadFromStorage('vct-updated-at', 0)) {
+        applyBlob(remote)
+      }
+    }
+    window.addEventListener('focus', refresh)
+    document.addEventListener('visibilitychange', refresh)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      document.removeEventListener('visibilitychange', refresh)
+    }
+  }, [session, applyBlob])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    setSession(null)
+    setShowSettings(false)
+  }
 
   // Pick today's background: a user photo if any are configured, else a gradient.
   useEffect(() => {
@@ -203,6 +339,20 @@ export default function App() {
     day: 'numeric',
   })
 
+  // While Supabase is checking the session / doing the first sync, show a
+  // calm placeholder rather than flashing the login or API-key screens.
+  if (SUPA_ON && !authReady) {
+    return <div className="h-[100dvh] bg-[#b9c5b0]" />
+  }
+
+  if (SUPA_ON && !session) {
+    return <Login />
+  }
+
+  if (SUPA_ON && session && !initialSync) {
+    return <div className="h-[100dvh] bg-[#b9c5b0]" />
+  }
+
   if (!apiKey) {
     return <ApiKeySetup onSave={handleSaveApiKey} />
   }
@@ -216,6 +366,8 @@ export default function App() {
         onMicSideChange={handleMicSideChange}
         onSave={handleSaveSettings}
         onClose={() => setShowSettings(false)}
+        onSignOut={SUPA_ON && session ? handleSignOut : null}
+        userEmail={session?.user?.email}
       />
     )
   }
