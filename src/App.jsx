@@ -150,7 +150,7 @@ export default function App() {
   }
 
   if (showHistory) {
-    return <DayHistory history={history} onBack={() => setShowHistory(false)} />
+    return <DayHistory history={history} goal={goal} onBack={() => setShowHistory(false)} />
   }
 
   return (
@@ -292,7 +292,7 @@ export default function App() {
         {entries.length > 0 && (
           <button
             onClick={handleCloseDay}
-            className="w-full py-3 rounded-2xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 active:bg-slate-100 active:scale-95 transition-all"
+            className="w-full py-1.5 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
           >
             Close & Save Day
           </button>
