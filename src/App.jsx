@@ -85,6 +85,10 @@ export default function App() {
     setEntries(prev => prev.filter(e => e.id !== id))
   }, [])
 
+  const handleEditEntry = useCallback((updated) => {
+    setEntries(prev => prev.map(e => e.id === updated.id ? updated : e))
+  }, [])
+
   const handleCloseDay = () => {
     if (entries.length === 0) return
     const record = {
@@ -119,7 +123,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-purple-50 flex flex-col max-w-md mx-auto">
       {/* Header */}
       <div className="bg-white border-b border-slate-100 px-5 pt-safe-top py-4 flex items-center justify-between">
         <div>
@@ -183,9 +187,9 @@ export default function App() {
         <div className="text-sm text-slate-400 mt-1 font-medium">calories today</div>
 
         <div className="flex justify-center gap-3 mt-5">
-          <MacroBadge label="Protein" value={`${totals.protein}g`} colorClass="bg-blue-50 text-blue-600" />
-          <MacroBadge label="Carbs" value={`${totals.carbs}g`} colorClass="bg-amber-50 text-amber-600" />
-          <MacroBadge label="Fat" value={`${totals.fat}g`} colorClass="bg-purple-50 text-purple-600" />
+          <MacroBadge label="Protein" value={`${totals.protein}g`} colorClass="bg-sky-50 text-sky-600" />
+          <MacroBadge label="Carbs" value={`${totals.carbs}g`} colorClass="bg-violet-100 text-violet-600" />
+          <MacroBadge label="Fat" value={`${totals.fat}g`} colorClass="bg-indigo-50 text-indigo-500" />
         </div>
       </div>
 
@@ -206,21 +210,21 @@ export default function App() {
         {isLoading && (
           <div className="flex items-center gap-3 bg-white rounded-2xl p-4 mb-2 shadow-sm border border-slate-100">
             <div className="flex gap-1 items-center">
-              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" />
+              <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce" />
             </div>
             <span className="text-slate-500 text-sm">Estimating nutrition…</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-2 text-red-600 text-sm">
+          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-4 mb-2 text-violet-700 text-sm">
             {error}
           </div>
         )}
 
-        <FoodLog entries={entries} onDelete={handleDeleteEntry} />
+        <FoodLog entries={entries} onDelete={handleDeleteEntry} onEdit={handleEditEntry} />
       </div>
 
       {/* Bottom Actions */}

@@ -19,7 +19,7 @@ export default function ApiKeySetup({ onSave }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 max-w-sm mx-auto">
-      <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
+      <div className="w-20 h-20 bg-violet-100 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
         <span className="text-4xl">🎤</span>
       </div>
       <h1 className="text-2xl font-bold text-slate-800 mb-2 text-center">Voice Calorie Tracker</h1>
@@ -40,7 +40,7 @@ export default function ApiKeySetup({ onSave }) {
           onChange={e => { setKey(e.target.value); setError('') }}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="sk-ant-api03-..."
-          className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono bg-slate-50"
+          className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 font-mono bg-slate-50"
           autoComplete="off"
           autoCapitalize="none"
         />
@@ -48,7 +48,7 @@ export default function ApiKeySetup({ onSave }) {
         <button
           onClick={handleSave}
           disabled={!key.trim()}
-          className="w-full mt-4 py-3.5 bg-emerald-500 text-white rounded-xl font-semibold text-sm disabled:opacity-40 active:scale-95 transition-transform"
+          className="w-full mt-4 py-3.5 bg-green-700 text-white rounded-xl font-semibold text-sm disabled:opacity-40 active:scale-95 transition-transform"
         >
           Get Started
         </button>
