@@ -169,7 +169,7 @@ export default function App() {
           <div className="w-full h-full" style={{ background: gradient }} />
         )}
         {/* Greyish overlay — tones down the photo, no blur */}
-        <div className="absolute inset-0 bg-slate-500/25" />
+        <div className="absolute inset-0 bg-slate-500/35" />
         {/* Gradient scrim so text is always readable */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
 
@@ -235,8 +235,8 @@ export default function App() {
         {/* Macros: protein emphasized, carbs/fat quiet */}
         <div className="flex items-center gap-3 mt-4">
           <div className="flex-1 bg-[#e8eef2] rounded-2xl px-4 py-2.5">
-            <div className="text-lg font-bold text-[#5e7d99] tabular-nums leading-none">{totals.protein}g</div>
-            <div className="text-xs text-[#5e7d99]/70 mt-1 font-medium">protein</div>
+            <div className="text-lg font-bold text-[#4e74a0] tabular-nums leading-none">{totals.protein}g</div>
+            <div className="text-xs text-[#4e74a0]/70 mt-1 font-medium">protein</div>
           </div>
           <div className="text-center px-2">
             <div className="text-sm font-semibold text-slate-500 tabular-nums leading-none">{totals.carbs}g</div>
