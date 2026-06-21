@@ -212,7 +212,7 @@ export default function App() {
       </div>
 
       {/* Calorie Total — pinned to top while scrolling */}
-      <div className="sticky top-0 z-20 -mx-3 px-3 bg-[#b9c5b0] pt-3">
+      <div className="sticky top-0 z-20 -mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3">
         <div className="bg-white shadow-sm px-5 pt-5 pb-5 rounded-3xl">
         <div className="flex items-end justify-between">
           <div>
