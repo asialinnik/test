@@ -18,7 +18,7 @@ export default function ApiKeySetup({ onSave }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#cdd9c0] flex flex-col items-center justify-center p-6 max-w-sm mx-auto">
+    <div className="min-h-screen bg-[#b9c5b0] flex flex-col items-center justify-center p-6 max-w-sm mx-auto">
       <div className="w-20 h-20 bg-violet-100 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
         <span className="text-4xl">🎤</span>
       </div>
