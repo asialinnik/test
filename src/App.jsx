@@ -213,7 +213,7 @@ export default function App() {
 
       {/* Calorie Total — always visible, not sticky (layout handles it) */}
       <div className="-mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3 flex-shrink-0">
-        <div className="bg-white shadow-sm px-5 py-4 rounded-3xl">
+        <div className="bg-white/70 backdrop-blur-md shadow-sm px-5 py-4 rounded-3xl">
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
