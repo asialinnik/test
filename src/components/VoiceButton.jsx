@@ -16,9 +16,8 @@ const loadPos = () => {
 
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max)
 
-export default function VoiceButton({ onResult, disabled, side = 'right' }) {
+export default function VoiceButton({ onResult, disabled, side = 'right', lang = 'en-US' }) {
   const [status, setStatus] = useState('idle') // idle | listening
-  const [liveText, setLiveText] = useState('')
   const [pos, setPos] = useState(loadPos) // {x,y} top-left in px, or null = default corner
   const [dragging, setDragging] = useState(false)
 
@@ -72,27 +71,22 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
     const rec = new SpeechRecognition()
     rec.continuous = true
     rec.interimResults = true
-    rec.lang = 'en-US'
+    rec.lang = lang
     rec.maxAlternatives = 1
 
     finalRef.current = ''
 
     rec.onstart = () => {
       setStatus('listening')
-      setLiveText('')
       armSilenceTimer()
     }
 
     rec.onresult = e => {
-      let interim = ''
       let final = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript
-        if (e.results[i].isFinal) final += t
-        else interim += t
+        if (e.results[i].isFinal) final += e.results[i][0].transcript
       }
       if (final) finalRef.current += final
-      setLiveText(finalRef.current || interim)
       armSilenceTimer() // heard something — restart the silence countdown
     }
 
@@ -100,7 +94,6 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
       clearTimeout(silenceRef.current)
       setStatus('idle')
       const result = finalRef.current.trim()
-      setLiveText('')
       if (result) onResult(result)
     }
 
@@ -108,7 +101,6 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
       if (e.error !== 'no-speech') console.error('Speech error:', e.error)
       clearTimeout(silenceRef.current)
       setStatus('idle')
-      setLiveText('')
     }
 
     recRef.current = rec
@@ -179,16 +171,9 @@ export default function VoiceButton({ onResult, disabled, side = 'right' }) {
 
   return (
     <div
-      className={`fixed z-30 flex flex-col gap-3 ${containerPos}`}
+      className={`fixed z-30 flex flex-col ${containerPos}`}
       style={containerStyle}
     >
-      {/* Live transcript bubble */}
-      {(isListening || liveText) && (
-        <div className="max-w-[72vw] bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl px-3.5 py-2 text-xs text-slate-600 leading-relaxed">
-          {liveText ? `"${liveText}"` : 'Listening… tap to stop'}
-        </div>
-      )}
-
       <button
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

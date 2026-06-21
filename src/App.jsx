@@ -62,10 +62,17 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [bgImage, setBgImage] = useState(null)
   const [micSide, setMicSide] = useState(() => loadFromStorage('vct-mic-side', 'right'))
+  const [lang, setLang] = useState(() => loadFromStorage('vct-lang', 'en-US'))
 
   const handleMicSideChange = (s) => {
     localStorage.setItem('vct-mic-side', JSON.stringify(s))
     setMicSide(s)
+  }
+
+  const toggleLang = () => {
+    const next = lang === 'en-US' ? 'de-DE' : 'en-US'
+    localStorage.setItem('vct-lang', JSON.stringify(next))
+    setLang(next)
   }
 
   useEffect(() => {
@@ -246,6 +253,13 @@ export default function App() {
         {/* Icons — top right */}
         <div className="absolute top-0 right-0 flex items-center gap-1 p-3">
           <button
+            onClick={toggleLang}
+            className="text-white/90 hover:text-white px-2 py-1 rounded-lg hover:bg-white/20 text-xs font-bold tracking-wide"
+            aria-label="Toggle voice language"
+          >
+            {lang === 'de-DE' ? 'DE' : 'EN'}
+          </button>
+          <button
             onClick={() => setShowHistory(true)}
             className="text-white/80 hover:text-white p-1.5 rounded-xl hover:bg-white/20"
             aria-label="History"
@@ -356,7 +370,7 @@ export default function App() {
       </div>
 
       {/* Floating mic button */}
-      <VoiceButton onResult={handleVoiceResult} disabled={isLoading} side={micSide} />
+      <VoiceButton onResult={handleVoiceResult} disabled={isLoading} side={micSide} lang={lang} />
     </div>
   )
 }
