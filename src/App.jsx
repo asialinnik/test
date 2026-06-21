@@ -171,7 +171,7 @@ export default function App() {
       </div>
 
       {/* Header */}
-      <div className="bg-white/70 backdrop-blur-md border-b border-white/40 px-5 pt-safe-top py-4 flex items-center justify-between">
+      <div className="bg-white/70 backdrop-blur-md border-b border-white/40 px-5 pt-safe-top py-4 flex items-center justify-between rounded-b-3xl">
         <div>
           <h1 className="text-base font-bold text-slate-800">Today</h1>
           <p className="text-xs text-slate-400">{todayLabel}</p>
@@ -226,7 +226,7 @@ export default function App() {
       </div>
 
       {/* Calorie Total */}
-      <div className="bg-white/70 backdrop-blur-md px-5 pt-5 pb-5 border-b border-white/40">
+      <div className="bg-white/70 backdrop-blur-md px-5 pt-5 pb-5 border-b border-white/40 rounded-b-3xl">
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
@@ -306,7 +306,7 @@ export default function App() {
       </div>
 
       {/* Bottom Actions */}
-      <div className="bg-white/70 backdrop-blur-md border-t border-white/40 px-5 py-4 space-y-2.5 pb-safe-bottom">
+      <div className="bg-white/70 backdrop-blur-md border-t border-white/40 px-5 py-4 space-y-2.5 pb-safe-bottom rounded-t-3xl">
         <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
         {entries.length > 0 && (
           <button
