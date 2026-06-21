@@ -162,10 +162,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#b9c5b0] flex flex-col max-w-md mx-auto px-3">
+    <div className="h-[100dvh] bg-[#b9c5b0] flex flex-col max-w-md mx-auto px-3 overflow-hidden">
 
       {/* Photo banner card — image at top of the stack */}
-      <div className="relative h-44 mt-3 rounded-3xl overflow-hidden shadow-sm">
+      <div className="relative h-44 mt-3 rounded-3xl overflow-hidden shadow-sm flex-shrink-0">
         {bgImage ? (
           <img
             src={bgImage}
@@ -211,8 +211,8 @@ export default function App() {
         </div>
       </div>
 
-      {/* Calorie Total — pinned to top while scrolling */}
-      <div className="sticky top-0 z-20 -mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3">
+      {/* Calorie Total — always visible, not sticky (layout handles it) */}
+      <div className="-mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3 flex-shrink-0">
         <div className="bg-white shadow-sm px-5 pt-5 pb-5 rounded-3xl">
         <div className="flex items-end justify-between">
           <div>
@@ -267,8 +267,8 @@ export default function App() {
         </div>
       </div>
 
-      {/* Food Log */}
-      <div className="flex-1 py-3 pb-28">
+      {/* Food Log — scrolls inside this container only, never behind the summary */}
+      <div className="flex-1 overflow-y-auto min-h-0 py-3 pb-28">
         {entries.length === 0 && !isLoading && (
           <div className="text-center text-slate-500 mt-20 px-4">
             <p className="text-base font-medium">these are the good days</p>
