@@ -40,20 +40,22 @@ create policy "own row - update" on public.app_data
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 ```
 
-## 3. Turn on email login (6-digit code)
+## 3. Turn on email + password login
 
-1. **Authentication → Providers → Email**: make sure **Email** is enabled.
-   Turn **Confirm email** ON (this is what sends the code).
-2. **Authentication → Email Templates → Magic Link**: replace the body so it
-   shows the code instead of (or in addition to) a link. Add this line:
+The app uses a simple email + password — no magic links, no email codes, no
+email template editing (Supabase locks templates behind paid custom SMTP).
+You pick a password once and sign in with it on any device.
 
-   ```
-   Your sign-in code: {{ .Token }}
-   ```
+1. **Authentication → Sign In / Providers → Email**: make sure **Email** is
+   enabled.
+2. Turn **Confirm email** *OFF*. (With it off, creating your account logs you
+   straight in without waiting for a confirmation email. Safe for a personal,
+   single-user app.)
+3. Click **Save**.
 
-   (The default template only has a link. Adding `{{ .Token }}` makes the
-   6-digit code appear, which is what the app asks you to type. This is more
-   reliable than links inside an iPhone home-screen app.)
+That's it — no template changes needed. The first time you open the app you'll
+tap "Create an account", enter your email + a password, and you're in. On any
+other device, just sign in with the same email + password.
 
 ## 4. Get your API keys
 
@@ -95,7 +97,8 @@ It's a PWA — there's nothing in the App Store; you "install" it from Safari:
 3. Scroll down → **Add to Home Screen** → **Add**.
 4. It now has its own icon and opens full-screen like a normal app.
 
-Sign in with your email once on each device; after that your data stays in sync.
+Sign in with your email + password once on each device; after that your data
+stays in sync.
 
 > Note: the microphone/voice input needs HTTPS — which your Vercel URL provides
 > automatically — and you'll be asked to allow microphone access the first time.
