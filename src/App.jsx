@@ -20,10 +20,40 @@ const loadFromStorage = (key, fallback) => {
   }
 }
 
+const computeTotals = (entries) =>
+  entries.reduce(
+    (acc, e) => ({
+      calories: acc.calories + (e.calories || 0),
+      protein: acc.protein + (e.protein || 0),
+      carbs: acc.carbs + (e.carbs || 0),
+      fat: acc.fat + (e.fat || 0),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  )
+
+const labelForDate = (dateStr) =>
+  new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
+
+// Build a saved-day record and merge it into a history list (replacing any
+// existing record for that date). Returns the new history array.
+const archiveInto = (history, dateStr, dayEntries) => {
+  const record = {
+    date: dateStr,
+    label: labelForDate(dateStr),
+    entries: dayEntries,
+    totals: computeTotals(dayEntries),
+  }
+  return [record, ...history.filter(h => h.date !== dateStr)]
+}
+
 export default function App() {
   const [apiKey, setApiKey] = useState(() => loadFromStorage('vct-api-key', ''))
   const [goal, setGoal] = useState(() => loadFromStorage('vct-goal', DEFAULT_GOAL))
-  const [today] = useState(getToday)
+  const [today, setToday] = useState(getToday)
   const [entries, setEntries] = useState(() => loadFromStorage(`vct-day-${getToday()}`, []))
   const [history, setHistory] = useState(() => loadFromStorage('vct-history', []))
   const [isLoading, setIsLoading] = useState(false)
@@ -42,6 +72,50 @@ export default function App() {
     localStorage.setItem(`vct-day-${today}`, JSON.stringify(entries))
   }, [entries, today])
 
+  // Catch-up auto-save: if the app was last open on an earlier day (e.g. closed
+  // overnight), archive that day before showing today's fresh log.
+  useEffect(() => {
+    const lastActive = loadFromStorage('vct-active-date', null)
+    const now = getToday()
+    if (lastActive && lastActive !== now) {
+      const prevEntries = loadFromStorage(`vct-day-${lastActive}`, [])
+      if (prevEntries.length > 0) {
+        setHistory(h => {
+          const updated = archiveInto(h, lastActive, prevEntries)
+          localStorage.setItem('vct-history', JSON.stringify(updated))
+          return updated
+        })
+      }
+      localStorage.removeItem(`vct-day-${lastActive}`)
+    }
+    localStorage.setItem('vct-active-date', JSON.stringify(now))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Live auto-save at midnight: while the app stays open, roll the day over
+  // the moment the calendar date changes.
+  useEffect(() => {
+    const tick = () => {
+      const now = getToday()
+      if (now === today) return
+      setEntries(curr => {
+        if (curr.length > 0) {
+          setHistory(h => {
+            const updated = archiveInto(h, today, curr)
+            localStorage.setItem('vct-history', JSON.stringify(updated))
+            return updated
+          })
+        }
+        return []
+      })
+      localStorage.removeItem(`vct-day-${today}`)
+      localStorage.setItem('vct-active-date', JSON.stringify(now))
+      setToday(now)
+    }
+    const interval = setInterval(tick, 30000)
+    return () => clearInterval(interval)
+  }, [today])
+
   // Pick today's background: a user photo if any are configured, else a gradient.
   useEffect(() => {
     let cancelled = false
@@ -55,15 +129,7 @@ export default function App() {
 
   const gradient = gradientScenes[dayIndex(gradientScenes.length)]
 
-  const totals = entries.reduce(
-    (acc, e) => ({
-      calories: acc.calories + (e.calories || 0),
-      protein: acc.protein + (e.protein || 0),
-      carbs: acc.carbs + (e.carbs || 0),
-      fat: acc.fat + (e.fat || 0),
-    }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
-  )
+  const totals = computeTotals(entries)
 
   const remaining = goal - totals.calories
   const progressPct = goal > 0 ? Math.min((totals.calories / goal) * 100, 100) : 0
@@ -117,17 +183,7 @@ export default function App() {
 
   const handleCloseDay = () => {
     if (entries.length === 0) return
-    const record = {
-      date: today,
-      label: new Date().toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-      }),
-      entries,
-      totals,
-    }
-    const newHistory = [record, ...history.filter(h => h.date !== today)]
+    const newHistory = archiveInto(history, today, entries)
     setHistory(newHistory)
     localStorage.setItem('vct-history', JSON.stringify(newHistory))
     setEntries([])
@@ -256,14 +312,6 @@ export default function App() {
             <div className="text-[11px] text-slate-400 mt-0.5">fat</div>
           </div>
         </div>
-        {entries.length > 0 && (
-          <button
-            onClick={handleCloseDay}
-            className="w-full mt-2 py-0.5 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
-          >
-            Close & Save Day
-          </button>
-        )}
         </div>
       </div>
 
@@ -293,6 +341,18 @@ export default function App() {
         )}
 
         <FoodLog entries={entries} onDelete={handleDeleteEntry} onEdit={handleEditEntry} />
+
+        {entries.length > 0 && (
+          <div className="text-center mt-4">
+            <button
+              onClick={handleCloseDay}
+              className="text-slate-400 text-xs font-medium hover:text-slate-600 active:scale-95 transition-all px-3 py-1"
+            >
+              Save day &amp; start fresh
+            </button>
+            <p className="text-[10px] text-slate-400/70 mt-1">Auto-saves at midnight</p>
+          </div>
+        )}
       </div>
 
       {/* Floating mic button */}
