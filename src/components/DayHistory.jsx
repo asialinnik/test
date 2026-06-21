@@ -1,6 +1,6 @@
 export default function DayHistory({ history, onBack }) {
   return (
-    <div className="min-h-screen bg-[#e8ebe6] flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-[#cdd9c0] flex flex-col max-w-md mx-auto">
       <div className="bg-white border-b border-slate-100 px-5 py-4 flex items-center gap-3 sticky top-0 z-10">
         <button
           onClick={onBack}
