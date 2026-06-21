@@ -254,14 +254,8 @@ export default function App() {
       {/* Food Log */}
       <div className="flex-1 py-3 pb-4">
         {entries.length === 0 && !isLoading && (
-          <div className="text-center text-slate-400 mt-12 px-4">
-            <p className="text-5xl mb-4">🥗</p>
-            <p className="text-sm font-medium">Nothing logged yet</p>
-            <p className="text-xs mt-1 leading-relaxed">
-              Tap the mic below and say what you just ate.
-              <br />
-              I'll handle the rest.
-            </p>
+          <div className="text-center text-slate-500 mt-20 px-4">
+            <p className="text-base font-medium">these are the good days</p>
           </div>
         )}
 
