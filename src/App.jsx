@@ -213,7 +213,7 @@ export default function App() {
 
       {/* Calorie Total — always visible, not sticky (layout handles it) */}
       <div className="-mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3 flex-shrink-0">
-        <div className="bg-white shadow-sm px-5 pt-5 pb-5 rounded-3xl">
+        <div className="bg-white shadow-sm px-5 py-4 rounded-3xl">
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
@@ -241,25 +241,25 @@ export default function App() {
           />
         </div>
 
-        {/* Macros: protein emphasized, carbs/fat quiet */}
-        <div className="flex items-center gap-3 mt-4">
-          <div className="flex-1 bg-[#e8eef2] rounded-2xl px-4 py-2.5">
+        {/* Macros: balanced columns, protein emphasized */}
+        <div className="flex items-stretch gap-2 mt-3.5">
+          <div className="flex-1 bg-[#e8eef2] rounded-2xl px-4 py-2 text-center">
             <div className="text-lg font-bold text-[#4e74a0] tabular-nums leading-none">{totals.protein}g</div>
             <div className="text-xs text-[#4e74a0]/70 mt-1 font-medium">protein</div>
           </div>
-          <div className="text-center px-2">
-            <div className="text-sm font-semibold text-[#9d8fc7] tabular-nums leading-none">{totals.carbs}g</div>
+          <div className="flex-1 rounded-2xl px-4 py-2 text-center">
+            <div className="text-lg font-semibold text-[#9d8fc7] tabular-nums leading-none">{totals.carbs}g</div>
             <div className="text-xs text-slate-400 mt-1">carbs</div>
           </div>
-          <div className="text-center px-2">
-            <div className="text-sm font-semibold text-[#aaa3d4] tabular-nums leading-none">{totals.fat}g</div>
+          <div className="flex-1 rounded-2xl px-4 py-2 text-center">
+            <div className="text-lg font-semibold text-[#aaa3d4] tabular-nums leading-none">{totals.fat}g</div>
             <div className="text-xs text-slate-400 mt-1">fat</div>
           </div>
         </div>
         {entries.length > 0 && (
           <button
             onClick={handleCloseDay}
-            className="w-full mt-3 py-1.5 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
+            className="w-full mt-2.5 py-1 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
           >
             Close & Save Day
           </button>
