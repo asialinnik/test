@@ -213,28 +213,28 @@ export default function App() {
 
       {/* Calorie Total — always visible, not sticky (layout handles it) */}
       <div className="-mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3 flex-shrink-0">
-        <div className="bg-white/70 backdrop-blur-md shadow-sm px-5 py-4 rounded-3xl">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
+        <div className="bg-white/70 backdrop-blur-md shadow-sm px-5 py-3.5 rounded-3xl">
+        <div className="flex items-baseline justify-between">
+          <div className="flex items-baseline gap-1.5">
+            <div className="text-4xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
               {totals.calories.toLocaleString()}
             </div>
-            <div className="text-xs text-slate-400 mt-1.5 font-medium">
-              of {goal.toLocaleString()} kcal
+            <div className="text-xs text-slate-400 font-medium">
+              of {goal.toLocaleString()}
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-slate-700 tabular-nums leading-none">
+          <div className="flex items-baseline gap-1">
+            <div className="text-xl font-bold text-slate-700 tabular-nums leading-none">
               {Math.abs(remaining).toLocaleString()}
             </div>
-            <div className="text-xs text-slate-400 mt-1.5 font-medium">
+            <div className="text-xs text-slate-400 font-medium">
               {remaining >= 0 ? 'left' : 'over'}
             </div>
           </div>
         </div>
 
         {/* Progress bar */}
-        <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="mt-2.5 h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${remaining >= 0 ? 'bg-green-600/70' : 'bg-violet-400'}`}
             style={{ width: `${progressPct}%` }}
@@ -242,24 +242,24 @@ export default function App() {
         </div>
 
         {/* Macros: balanced columns, protein emphasized */}
-        <div className="flex items-stretch gap-2 mt-3.5">
-          <div className="flex-1 bg-[#e8eef2] rounded-2xl px-4 py-2 text-center">
-            <div className="text-lg font-bold text-[#4e74a0] tabular-nums leading-none">{totals.protein}g</div>
-            <div className="text-xs text-[#4e74a0]/70 mt-1 font-medium">protein</div>
+        <div className="flex items-stretch gap-2 mt-2.5">
+          <div className="flex-1 bg-[#e8eef2] rounded-xl px-3 py-1.5 text-center">
+            <div className="text-base font-bold text-[#4e74a0] tabular-nums leading-none">{totals.protein}g</div>
+            <div className="text-[11px] text-[#4e74a0]/70 mt-0.5 font-medium">protein</div>
           </div>
-          <div className="flex-1 rounded-2xl px-4 py-2 text-center">
-            <div className="text-lg font-semibold text-[#9d8fc7] tabular-nums leading-none">{totals.carbs}g</div>
-            <div className="text-xs text-slate-400 mt-1">carbs</div>
+          <div className="flex-1 rounded-xl px-3 py-1.5 text-center">
+            <div className="text-base font-semibold text-[#9d8fc7] tabular-nums leading-none">{totals.carbs}g</div>
+            <div className="text-[11px] text-slate-400 mt-0.5">carbs</div>
           </div>
-          <div className="flex-1 rounded-2xl px-4 py-2 text-center">
-            <div className="text-lg font-semibold text-[#aaa3d4] tabular-nums leading-none">{totals.fat}g</div>
-            <div className="text-xs text-slate-400 mt-1">fat</div>
+          <div className="flex-1 rounded-xl px-3 py-1.5 text-center">
+            <div className="text-base font-semibold text-[#aaa3d4] tabular-nums leading-none">{totals.fat}g</div>
+            <div className="text-[11px] text-slate-400 mt-0.5">fat</div>
           </div>
         </div>
         {entries.length > 0 && (
           <button
             onClick={handleCloseDay}
-            className="w-full mt-2.5 py-1 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
+            className="w-full mt-2 py-0.5 rounded-xl text-slate-400 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all"
           >
             Close & Save Day
           </button>

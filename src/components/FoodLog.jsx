@@ -12,7 +12,7 @@ export default function FoodLog({ entries, onDelete, onEdit }) {
         {entries.map(entry => (
           <div
             key={entry.id}
-            className="bg-white rounded-xl px-3.5 py-2.5 shadow-sm flex items-center gap-3 active:scale-[0.99] transition-transform cursor-pointer"
+            className="bg-white/70 backdrop-blur-md rounded-xl px-3.5 py-2.5 shadow-sm flex items-center gap-3 active:scale-[0.99] transition-transform cursor-pointer"
             onClick={() => setEditing(entry)}
           >
             <div className="flex-1 min-w-0">
