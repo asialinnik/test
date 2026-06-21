@@ -240,11 +240,11 @@ export default function App() {
             <div className="text-xs text-[#4e74a0]/70 mt-1 font-medium">protein</div>
           </div>
           <div className="text-center px-2">
-            <div className="text-sm font-semibold text-slate-500 tabular-nums leading-none">{totals.carbs}g</div>
+            <div className="text-sm font-semibold text-[#9d8fc7] tabular-nums leading-none">{totals.carbs}g</div>
             <div className="text-xs text-slate-400 mt-1">carbs</div>
           </div>
           <div className="text-center px-2">
-            <div className="text-sm font-semibold text-slate-500 tabular-nums leading-none">{totals.fat}g</div>
+            <div className="text-sm font-semibold text-[#aaa3d4] tabular-nums leading-none">{totals.fat}g</div>
             <div className="text-xs text-slate-400 mt-1">fat</div>
           </div>
         </div>

@@ -24,7 +24,7 @@ export default function VoiceButton({ onResult, disabled }) {
     }
 
     const rec = new SpeechRecognition()
-    rec.continuous = false
+    rec.continuous = true
     rec.interimResults = true
     rec.lang = 'en-US'
     rec.maxAlternatives = 1

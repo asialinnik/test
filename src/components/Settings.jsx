@@ -15,21 +15,23 @@ export default function Settings({ apiKey, goal, onSave, onClose }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#b9c5b0] flex flex-col max-w-md mx-auto">
-      <div className="bg-white/80 backdrop-blur border-b border-slate-100 px-5 py-4 flex items-center gap-3 sticky top-0 z-10">
-        <button
-          onClick={onClose}
-          className="text-slate-400 hover:text-slate-600 p-1 -ml-1 rounded-lg hover:bg-slate-100"
-          aria-label="Back"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
-        </button>
-        <h1 className="text-lg font-bold text-slate-800">Settings</h1>
+    <div className="min-h-screen bg-[#b9c5b0] flex flex-col max-w-md mx-auto px-3">
+      <div className="sticky top-0 z-10 -mx-3 px-3 bg-[#b9c5b0] pt-3 pb-1">
+        <div className="bg-white shadow-sm px-5 py-4 flex items-center gap-3 rounded-3xl">
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 p-1 -ml-1 rounded-lg hover:bg-slate-100"
+            aria-label="Back"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <h1 className="text-lg font-bold text-slate-800">Settings</h1>
+        </div>
       </div>
 
-      <div className="flex-1 p-4 space-y-4">
+      <div className="flex-1 py-3 space-y-4">
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
           <label className="text-sm font-bold text-slate-700 block mb-1">Daily calorie goal</label>
           <p className="text-xs text-slate-400 mb-3">A soft target — shows how much you have left through the day.</p>
