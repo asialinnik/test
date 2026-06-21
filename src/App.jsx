@@ -154,7 +154,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-[100dvh] bg-[#b9c5b0] flex flex-col max-w-md mx-auto px-3 overflow-hidden">
+    <div className="min-h-[100dvh] bg-[#b9c5b0] flex flex-col max-w-md mx-auto px-3">
 
       {/* Photo banner card — image at top of the stack */}
       <div className="relative h-44 mt-3 rounded-3xl overflow-hidden shadow-sm">
@@ -203,8 +203,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* Calorie Total */}
-      <div className="bg-white shadow-sm px-5 pt-5 pb-5 mt-3 rounded-3xl">
+      {/* Calorie Total — pinned to top while scrolling */}
+      <div className="sticky top-0 z-20 -mx-3 px-3 bg-[#b9c5b0] pt-3">
+        <div className="bg-white shadow-sm px-5 pt-5 pb-5 rounded-3xl">
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
@@ -247,10 +248,11 @@ export default function App() {
             <div className="text-xs text-slate-400 mt-1">fat</div>
           </div>
         </div>
+        </div>
       </div>
 
       {/* Food Log */}
-      <div className="flex-1 overflow-y-auto py-3">
+      <div className="flex-1 py-3 pb-4">
         {entries.length === 0 && !isLoading && (
           <div className="text-center text-slate-400 mt-12 px-4">
             <p className="text-5xl mb-4">🥗</p>
@@ -283,8 +285,9 @@ export default function App() {
         <FoodLog entries={entries} onDelete={handleDeleteEntry} onEdit={handleEditEntry} />
       </div>
 
-      {/* Bottom Actions */}
-      <div className="bg-white shadow-sm px-5 py-4 mb-3 space-y-2.5 pb-safe-bottom rounded-3xl">
+      {/* Bottom Actions — pinned to bottom while scrolling */}
+      <div className="sticky bottom-0 z-20 -mx-3 px-3 bg-[#b9c5b0] pt-3 pb-3">
+        <div className="bg-white shadow-sm px-5 py-4 space-y-2.5 rounded-3xl">
         <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
         {entries.length > 0 && (
           <button
@@ -294,6 +297,7 @@ export default function App() {
             Close & Save Day
           </button>
         )}
+        </div>
       </div>
     </div>
   )
