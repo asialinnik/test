@@ -234,9 +234,9 @@ export default function App() {
 
         {/* Macros: protein emphasized, carbs/fat quiet */}
         <div className="flex items-center gap-3 mt-4">
-          <div className="flex-1 bg-sky-50 rounded-2xl px-4 py-2.5">
-            <div className="text-lg font-bold text-sky-600 tabular-nums leading-none">{totals.protein}g</div>
-            <div className="text-xs text-sky-500/70 mt-1 font-medium">protein</div>
+          <div className="flex-1 bg-[#e8eef2] rounded-2xl px-4 py-2.5">
+            <div className="text-lg font-bold text-[#5e7d99] tabular-nums leading-none">{totals.protein}g</div>
+            <div className="text-xs text-[#5e7d99]/70 mt-1 font-medium">protein</div>
           </div>
           <div className="text-center px-2">
             <div className="text-sm font-semibold text-slate-500 tabular-nums leading-none">{totals.carbs}g</div>

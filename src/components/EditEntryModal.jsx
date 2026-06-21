@@ -46,7 +46,7 @@ export default function EditEntryModal({ entry, onSave, onDelete, onClose }) {
 
           <div className="grid grid-cols-2 gap-3">
             <NumberField label="Calories" value={calories} onChange={setCalories} unit="kcal" />
-            <NumberField label="Protein" value={protein} onChange={setProtein} unit="g" color="text-sky-600" />
+            <NumberField label="Protein" value={protein} onChange={setProtein} unit="g" color="text-[#5e7d99]" />
             <NumberField label="Carbs" value={carbs} onChange={setCarbs} unit="g" color="text-violet-600" />
             <NumberField label="Fat" value={fat} onChange={setFat} unit="g" color="text-indigo-500" />
           </div>

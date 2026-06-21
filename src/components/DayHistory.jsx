@@ -40,7 +40,7 @@ export default function DayHistory({ history, onBack }) {
                 <span className="text-base font-normal text-slate-400 ml-1">cal</span>
               </p>
               <div className="flex gap-3 mt-2">
-                <span className="text-xs font-medium text-sky-500 bg-sky-50 px-2 py-0.5 rounded-full tabular-nums">
+                <span className="text-xs font-medium text-[#5e7d99] bg-[#e8eef2] px-2 py-0.5 rounded-full tabular-nums">
                   {day.totals.protein}g P
                 </span>
                 <span className="text-xs font-medium text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full tabular-nums">
