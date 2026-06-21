@@ -154,7 +154,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col max-w-md mx-auto">
+    <div className="relative min-h-screen flex flex-col max-w-md mx-auto px-3">
       {/* Background: today's photo (or gradient), softened behind a hazy scrim */}
       <div className="fixed inset-0 -z-10">
         {bgImage ? (
@@ -171,7 +171,7 @@ export default function App() {
       </div>
 
       {/* Header */}
-      <div className="bg-white/70 backdrop-blur-md border-b border-white/40 px-5 pt-safe-top py-4 flex items-center justify-between rounded-b-3xl">
+      <div className="bg-white/70 backdrop-blur-md border border-white/50 shadow-sm px-5 py-4 mt-3 flex items-center justify-between rounded-3xl">
         <div>
           <h1 className="text-base font-bold text-slate-800">Today</h1>
           <p className="text-xs text-slate-400">{todayLabel}</p>
@@ -226,7 +226,7 @@ export default function App() {
       </div>
 
       {/* Calorie Total */}
-      <div className="bg-white/70 backdrop-blur-md px-5 pt-5 pb-5 border-b border-white/40 rounded-b-3xl">
+      <div className="bg-white/70 backdrop-blur-md border border-white/50 shadow-sm px-5 pt-5 pb-5 mt-3 rounded-3xl">
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-extrabold text-slate-800 tabular-nums tracking-tight leading-none">
@@ -272,7 +272,7 @@ export default function App() {
       </div>
 
       {/* Food Log */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto py-3">
         {entries.length === 0 && !isLoading && (
           <div className="text-center text-slate-400 mt-12 px-4">
             <p className="text-5xl mb-4">🥗</p>
@@ -306,7 +306,7 @@ export default function App() {
       </div>
 
       {/* Bottom Actions */}
-      <div className="bg-white/70 backdrop-blur-md border-t border-white/40 px-5 py-4 space-y-2.5 pb-safe-bottom rounded-t-3xl">
+      <div className="bg-white/70 backdrop-blur-md border border-white/50 shadow-sm px-5 py-4 mb-3 space-y-2.5 pb-safe-bottom rounded-3xl">
         <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
         {entries.length > 0 && (
           <button
