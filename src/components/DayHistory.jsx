@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import EditEntryModal from './EditEntryModal.jsx'
+import TextEntryModal from './TextEntryModal.jsx'
 
 function computeTotals(entries) {
   return entries.reduce(
@@ -16,6 +17,7 @@ function computeTotals(entries) {
 function DayDetail({ day, onBack, onUpdateDay, apiKey }) {
   const [entries, setEntries] = useState(day.entries)
   const [editing, setEditing] = useState(null)
+  const [showAdd, setShowAdd] = useState(false)
 
   const save = (updated) => {
     setEntries(updated)
@@ -31,6 +33,12 @@ function DayDetail({ day, onBack, onUpdateDay, apiKey }) {
   const handleDelete = (id) => {
     const updated = entries.filter(e => e.id !== id)
     setEditing(null)
+    save(updated)
+  }
+
+  const handleAdd = (entry) => {
+    const updated = [entry, ...entries]
+    setShowAdd(false)
     save(updated)
   }
 
@@ -68,7 +76,15 @@ function DayDetail({ day, onBack, onUpdateDay, apiKey }) {
         </div>
 
         {/* Each food entry — tappable to edit */}
-        <p className="text-xs font-semibold text-slate-500 px-1 pt-1">What you ate · tap to edit</p>
+        <div className="flex items-center justify-between px-1 pt-1">
+          <p className="text-xs font-semibold text-slate-500">What you ate · tap to edit</p>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="text-xs font-semibold text-[#5f7c66] hover:text-[#4a6652]"
+          >
+            + Add entry
+          </button>
+        </div>
         {entries.length === 0 && (
           <p className="text-xs text-slate-400 px-1">No entries left.</p>
         )}
@@ -101,6 +117,14 @@ function DayDetail({ day, onBack, onUpdateDay, apiKey }) {
           onSave={handleEdit}
           onDelete={() => handleDelete(editing.id)}
           onClose={() => setEditing(null)}
+          apiKey={apiKey}
+        />
+      )}
+
+      {showAdd && (
+        <TextEntryModal
+          onAdd={handleAdd}
+          onClose={() => setShowAdd(false)}
           apiKey={apiKey}
         />
       )}
