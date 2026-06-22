@@ -104,9 +104,9 @@ export default function App() {
     localStorage.setItem(`vct-day-${today}`, JSON.stringify(entries))
   }, [entries, today])
 
-  // Catch-up auto-save: if the app was last open on an earlier day (e.g. closed
-  // overnight), archive that day before showing today's fresh log.
-  useEffect(() => {
+  // Catch-up auto-save: archive the previous day's entries if the date has
+  // changed since the app was last open (covers device-locked / backgrounded case).
+  const catchUp = useCallback(() => {
     const lastActive = loadFromStorage('vct-active-date', null)
     const now = getToday()
     if (lastActive && lastActive !== now) {
@@ -119,8 +119,17 @@ export default function App() {
         })
       }
       localStorage.removeItem(`vct-day-${lastActive}`)
+      setEntries([])
+      setToday(now)
     }
     localStorage.setItem('vct-active-date', JSON.stringify(now))
+  }, [])
+
+  useEffect(() => {
+    catchUp()
+    const onVisible = () => { if (document.visibilityState === 'visible') catchUp() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -268,7 +277,7 @@ export default function App() {
       setBgImage(`/backgrounds/${file}`)
     })
     return () => { cancelled = true }
-  }, [])
+  }, [today])
 
   const gradient = gradientScenes[dayIndex(gradientScenes.length)]
 

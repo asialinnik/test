@@ -18,7 +18,7 @@ export default function FoodLog({ entries, onDelete, onEdit }) {
             <div className="flex-1 min-w-0">
               <p className="text-sm text-slate-700 leading-snug truncate">{entry.description}</p>
               <p className="text-xs text-slate-400 mt-0.5">
-                {entry.time} · <span className="text-[#4e74a0] font-medium">{entry.protein}g protein</span>
+                {entry.time && <>{entry.time} · </>}<span className="text-[#4e74a0] font-medium">{entry.protein}g protein</span>
               </p>
             </div>
             <div className="text-right flex-shrink-0">
