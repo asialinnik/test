@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import EditEntryModal from './EditEntryModal.jsx'
 
-export default function FoodLog({ entries, onDelete, onEdit }) {
+export default function FoodLog({ entries, onDelete, onEdit, apiKey }) {
   const [editing, setEditing] = useState(null)
 
   if (entries.length === 0) return null
@@ -35,6 +35,7 @@ export default function FoodLog({ entries, onDelete, onEdit }) {
           onSave={updated => { onEdit(updated); setEditing(null) }}
           onDelete={() => { onDelete(editing.id); setEditing(null) }}
           onClose={() => setEditing(null)}
+          apiKey={apiKey}
         />
       )}
     </>

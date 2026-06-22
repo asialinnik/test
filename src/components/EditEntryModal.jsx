@@ -1,11 +1,33 @@
 import { useState } from 'react'
+import { parseFood } from '../utils/parseFood.js'
 
-export default function EditEntryModal({ entry, onSave, onDelete, onClose }) {
+export default function EditEntryModal({ entry, onSave, onDelete, onClose, apiKey }) {
   const [calories, setCalories] = useState(String(entry.calories))
   const [protein, setProtein] = useState(String(entry.protein))
   const [carbs, setCarbs] = useState(String(entry.carbs))
   const [fat, setFat] = useState(String(entry.fat))
   const [description, setDescription] = useState(entry.description)
+  const [recalculating, setRecalculating] = useState(false)
+  const [recalcError, setRecalcError] = useState('')
+
+  const descriptionChanged = description.trim() !== entry.description.trim()
+
+  const handleRecalculate = async () => {
+    if (!apiKey) { setRecalcError('No API key set — add one in Settings.'); return }
+    setRecalculating(true)
+    setRecalcError('')
+    try {
+      const data = await parseFood(description, apiKey)
+      setCalories(String(Math.round(data.total.calories)))
+      setProtein(String(Math.round(data.total.protein)))
+      setCarbs(String(Math.round(data.total.carbs)))
+      setFat(String(Math.round(data.total.fat)))
+    } catch (e) {
+      setRecalcError(e.message)
+    } finally {
+      setRecalculating(false)
+    }
+  }
 
   const handleSave = () => {
     onSave({
@@ -38,10 +60,20 @@ export default function EditEntryModal({ entry, onSave, onDelete, onClose }) {
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1">Description</label>
             <textarea
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={e => { setDescription(e.target.value); setRecalcError('') }}
               rows={2}
               className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"
             />
+            {descriptionChanged && (
+              <button
+                onClick={handleRecalculate}
+                disabled={recalculating}
+                className="mt-1.5 text-xs font-medium text-[#5f7c66] hover:text-[#4a6652] disabled:opacity-50"
+              >
+                {recalculating ? 'Recalculating…' : 'Recalculate nutrition →'}
+              </button>
+            )}
+            {recalcError && <p className="mt-1 text-xs text-violet-600">{recalcError}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
