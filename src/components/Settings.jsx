@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
-export default function Settings({ apiKey, goal, micSide = 'right', onMicSideChange, onSave, onClose, onSignOut, userEmail }) {
+export default function Settings({ apiKey, goal, micSide = 'right', onMicSideChange, onSave, onClose, onSignOut, userEmail, micPreauth, onMicPreauthChange }) {
   const [key, setKey] = useState(apiKey || '')
   const [goalValue, setGoalValue] = useState(String(goal))
   const [error, setError] = useState('')
+  const [micStatus, setMicStatus] = useState(null) // null | 'granted' | 'denied'
 
   const handleSave = () => {
     const trimmed = key.trim()
@@ -12,6 +13,23 @@ export default function Settings({ apiKey, goal, micSide = 'right', onMicSideCha
       return
     }
     onSave({ apiKey: trimmed, goal: Math.max(0, parseInt(goalValue) || 0) })
+  }
+
+  const handleMicToggle = async () => {
+    const next = !micPreauth
+    if (next) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach(t => t.stop())
+        setMicStatus('granted')
+        onMicPreauthChange(true)
+      } catch {
+        setMicStatus('denied')
+      }
+    } else {
+      onMicPreauthChange(false)
+      setMicStatus(null)
+    }
   }
 
   return (
@@ -65,6 +83,28 @@ export default function Settings({ apiKey, goal, micSide = 'right', onMicSideCha
                 {s}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-bold text-slate-700 block mb-1">Microphone access</label>
+              <p className="text-xs text-slate-400">
+                {micStatus === 'granted' ? 'Permission granted — mic won\'t prompt when you speak.' :
+                 micStatus === 'denied' ? 'Permission denied — check your browser/OS settings.' :
+                 micPreauth ? 'Active — mic is pre-authorized on startup.' :
+                 'Enable to avoid mic permission prompts each session.'}
+              </p>
+            </div>
+            <button
+              onClick={handleMicToggle}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ml-4 ${micPreauth ? 'bg-[#5f7c66]' : 'bg-slate-200'}`}
+              role="switch"
+              aria-checked={micPreauth}
+            >
+              <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${micPreauth ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
           </div>
         </div>
 

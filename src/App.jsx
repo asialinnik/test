@@ -82,6 +82,7 @@ export default function App() {
   const [bgImage, setBgImage] = useState(null)
   const [micSide, setMicSide] = useState(() => loadFromStorage('vct-mic-side', 'right'))
   const [lang, setLang] = useState(() => loadFromStorage('vct-lang', 'en-US'))
+  const [micPreauth, setMicPreauth] = useState(() => loadFromStorage('vct-mic-preauth', false))
   const [showTextEntry, setShowTextEntry] = useState(false)
   const [suggestion, setSuggestion] = useState(null)
   const [isSuggesting, setIsSuggesting] = useState(false)
@@ -103,6 +104,23 @@ export default function App() {
     localStorage.setItem('vct-lang', JSON.stringify(next))
     setLang(next)
   }
+
+  const handleMicPreauthChange = (val) => {
+    localStorage.setItem('vct-mic-preauth', JSON.stringify(val))
+    setMicPreauth(val)
+  }
+
+  const handleUpdateHistoryDay = useCallback((date, updatedEntries) => {
+    setHistory(h => {
+      const updated = h.map(day => {
+        if (day.date !== date) return day
+        const totals = computeTotals(updatedEntries)
+        return { ...day, entries: updatedEntries, totals }
+      })
+      localStorage.setItem('vct-history', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   useEffect(() => {
     localStorage.setItem(`vct-day-${today}`, JSON.stringify(entries))
@@ -137,6 +155,14 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVisible)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Pre-warm microphone permission so SpeechRecognition doesn't prompt mid-use.
+  useEffect(() => {
+    if (!micPreauth) return
+    navigator.mediaDevices?.getUserMedia({ audio: true })
+      .then(s => s.getTracks().forEach(t => t.stop()))
+      .catch(() => {})
+  }, [micPreauth])
 
   // Live auto-save at midnight: while the app stays open, roll the day over
   // the moment the calendar date changes.
@@ -401,12 +427,14 @@ export default function App() {
         onClose={() => setShowSettings(false)}
         onSignOut={SUPA_ON && session ? handleSignOut : null}
         userEmail={session?.user?.email}
+        micPreauth={micPreauth}
+        onMicPreauthChange={handleMicPreauthChange}
       />
     )
   }
 
   if (showHistory) {
-    return <DayHistory history={history} goal={goal} onBack={() => setShowHistory(false)} />
+    return <DayHistory history={history} goal={goal} onBack={() => setShowHistory(false)} onUpdateDay={handleUpdateHistoryDay} apiKey={apiKey} />
   }
 
   return (
