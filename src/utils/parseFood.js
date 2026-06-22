@@ -1,3 +1,29 @@
+export async function suggestMeal(remainingCalories, apiKey) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 120,
+      messages: [{
+        role: 'user',
+        content: `I have ${remainingCalories} calories left for today. Suggest one simple, realistic meal or snack that fits. Reply in 1-2 casual sentences. Include approximate calories. No bullet points, no headers.`,
+      }],
+    }),
+  })
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('Invalid API key — check your key in Settings.')
+    throw new Error('Could not get suggestion — try again.')
+  }
+  const data = await response.json()
+  return data.content[0].text.trim()
+}
+
 export async function parseFood(text, apiKey) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

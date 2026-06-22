@@ -5,7 +5,8 @@ import DayHistory from './components/DayHistory.jsx'
 import ApiKeySetup from './components/ApiKeySetup.jsx'
 import Settings from './components/Settings.jsx'
 import Login from './components/Login.jsx'
-import { parseFood } from './utils/parseFood.js'
+import TextEntryModal from './components/TextEntryModal.jsx'
+import { parseFood, suggestMeal } from './utils/parseFood.js'
 import { gradientScenes, dayIndex, loadUserImages } from './utils/backgrounds.js'
 import { supabase, isSupabaseConfigured } from './lib/supabase.js'
 import { pullRemote, pushRemote } from './lib/sync.js'
@@ -81,6 +82,9 @@ export default function App() {
   const [bgImage, setBgImage] = useState(null)
   const [micSide, setMicSide] = useState(() => loadFromStorage('vct-mic-side', 'right'))
   const [lang, setLang] = useState(() => loadFromStorage('vct-lang', 'en-US'))
+  const [showTextEntry, setShowTextEntry] = useState(false)
+  const [suggestion, setSuggestion] = useState(null)
+  const [isSuggesting, setIsSuggesting] = useState(false)
 
   // --- Auth / cloud sync ---
   const [session, setSession] = useState(null)
@@ -102,6 +106,7 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem(`vct-day-${today}`, JSON.stringify(entries))
+    setSuggestion(null)
   }, [entries, today])
 
   // Catch-up auto-save: archive the previous day's entries if the date has
@@ -333,6 +338,25 @@ export default function App() {
     setEntries(prev => prev.map(e => e.id === updated.id ? updated : e))
   }, [])
 
+  const handleTextEntry = useCallback((entry) => {
+    setEntries(prev => [entry, ...prev])
+    setShowTextEntry(false)
+  }, [])
+
+  const handleSuggestMeal = useCallback(async () => {
+    if (!apiKey) return
+    setIsSuggesting(true)
+    setSuggestion(null)
+    try {
+      const text = await suggestMeal(remaining, apiKey)
+      setSuggestion(text)
+    } catch (e) {
+      setSuggestion(`Error: ${e.message}`)
+    } finally {
+      setIsSuggesting(false)
+    }
+  }, [apiKey, remaining])
+
   const handleCloseDay = () => {
     if (entries.length === 0) return
     const newHistory = archiveInto(history, today, entries)
@@ -515,7 +539,32 @@ export default function App() {
           </div>
         )}
 
-        <FoodLog entries={entries} onDelete={handleDeleteEntry} onEdit={handleEditEntry} />
+        <FoodLog entries={entries} onDelete={handleDeleteEntry} onEdit={handleEditEntry} apiKey={apiKey} />
+
+        {entries.length > 0 && remaining > 50 && (
+          <div className="mt-3">
+            {suggestion ? (
+              <div className="bg-white/70 backdrop-blur-md rounded-2xl px-4 py-3 shadow-sm">
+                <p className="text-sm text-slate-600 leading-relaxed">{suggestion}</p>
+                <button
+                  onClick={handleSuggestMeal}
+                  disabled={isSuggesting}
+                  className="text-xs text-slate-400 mt-2 hover:text-slate-600 disabled:opacity-50"
+                >
+                  {isSuggesting ? 'Thinking…' : 'Suggest something else'}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleSuggestMeal}
+                disabled={isSuggesting || !apiKey}
+                className="w-full py-3 rounded-2xl border border-dashed border-slate-300/80 text-slate-400 text-sm hover:border-slate-400 hover:text-slate-500 transition-colors disabled:opacity-40"
+              >
+                {isSuggesting ? 'Thinking…' : `What can I eat with ${remaining.toLocaleString()} kcal left?`}
+              </button>
+            )}
+          </div>
+        )}
 
         {entries.length > 0 && (
           <div className="text-center mt-4">
@@ -532,6 +581,25 @@ export default function App() {
 
       {/* Floating mic button */}
       <VoiceButton onResult={handleVoiceResult} disabled={isLoading} side={micSide} lang={lang} />
+
+      {/* Floating text-entry button on the opposite side from the mic */}
+      <button
+        onClick={() => setShowTextEntry(true)}
+        className={`fixed bottom-6 ${micSide === 'right' ? 'left-5' : 'right-5'} w-11 h-11 rounded-2xl bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-slate-500 hover:text-slate-700 active:scale-95 transition-all`}
+        aria-label="Type food manually"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+          <path d="M2.695 14.763l-1.262 3.154a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.885L17.5 5.5a2.121 2.121 0 0 0-3-3L3.58 13.42a4 4 0 0 0-.885 1.343Z" />
+        </svg>
+      </button>
+
+      {showTextEntry && (
+        <TextEntryModal
+          onAdd={handleTextEntry}
+          onClose={() => setShowTextEntry(false)}
+          apiKey={apiKey}
+        />
+      )}
     </div>
   )
 }
