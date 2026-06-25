@@ -140,6 +140,8 @@ export default function App() {
           localStorage.setItem('vct-history', JSON.stringify(updated))
           return updated
         })
+        // Bump timestamp so sign-in reconcile pushes this archived day instead of pulling cloud.
+        localStorage.setItem('vct-updated-at', JSON.stringify(Date.now()))
       }
       localStorage.removeItem(`vct-day-${lastActive}`)
       setEntries([])
@@ -210,7 +212,13 @@ export default function App() {
       setGoal(blob.goal)
       localStorage.setItem('vct-goal', JSON.stringify(blob.goal))
     }
-    let history2 = Array.isArray(blob.history) ? blob.history : []
+    // Merge: cloud wins for same date, but locally-archived days not yet pushed are kept.
+    const localHistory = loadFromStorage('vct-history', [])
+    const cloudHistory = Array.isArray(blob.history) ? blob.history : []
+    const byDate = {}
+    localHistory.forEach(d => { byDate[d.date] = d })
+    cloudHistory.forEach(d => { byDate[d.date] = d })
+    let history2 = Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date))
     const now = getToday()
     if (blob.currentDate === now && Array.isArray(blob.currentEntries)) {
       setEntries(blob.currentEntries)
