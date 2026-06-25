@@ -62,7 +62,7 @@ export default function EditEntryModal({ entry, onSave, onDelete, onClose, apiKe
               value={description}
               onChange={e => { setDescription(e.target.value); setRecalcError('') }}
               rows={2}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"
             />
             {descriptionChanged && (
               <button

@@ -64,7 +64,7 @@ export default function TextEntryModal({ onAdd, onClose, apiKey }) {
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !estimating) { e.preventDefault(); handleEstimate() } }}
           placeholder="e.g. 200g Greek yogurt with a handful of blueberries"
           rows={3}
-          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"
+          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"
         />
 
         {error && <p className="mt-1.5 text-xs text-violet-600">{error}</p>}
@@ -85,7 +85,7 @@ export default function TextEntryModal({ onAdd, onClose, apiKey }) {
                     inputMode="numeric"
                     value={result[key]}
                     onChange={e => setResult(r => ({ ...r, [key]: e.target.value }))}
-                    className={`w-full bg-transparent text-sm font-bold focus:outline-none tabular-nums ${color}`}
+                    className={`w-full bg-transparent text-base font-bold focus:outline-none tabular-nums ${color}`}
                     min="0"
                   />
                   <span className="text-[10px] text-slate-400 flex-shrink-0">{unit}</span>
