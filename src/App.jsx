@@ -236,6 +236,53 @@ export default function App() {
     lastSyncedRef.current = blobSignature({ ...blob, history: history2, currentDate: now, currentEntries: blob.currentDate === now ? blob.currentEntries : [] })
   }, [])
 
+  // Download all entries as a JSON file (API key deliberately excluded).
+  const handleExportData = useCallback(() => {
+    const { apiKey: _omitKey, updatedAt: _omitTs, ...data } = gatherBlob()
+    const payload = { app: 'voice-calorie-tracker', version: 1, exportedAt: new Date().toISOString(), ...data }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `calorie-tracker-backup-${getToday()}.json`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }, [gatherBlob])
+
+  // Restore from an exported file. Non-destructive: merges with whatever's
+  // already here (imported wins per-date), then lets it sync up to the cloud.
+  const handleImportData = useCallback((parsed) => {
+    const now = getToday()
+    const incoming = Array.isArray(parsed.history) ? parsed.history : []
+    setHistory(h => {
+      const byDate = {}
+      h.forEach(d => { if (d && d.date) byDate[d.date] = d })
+      incoming.forEach(d => { if (d && d.date) byDate[d.date] = d })
+      let merged = Object.values(byDate)
+      if (parsed.currentDate && parsed.currentDate !== now && Array.isArray(parsed.currentEntries) && parsed.currentEntries.length) {
+        merged = archiveInto(merged, parsed.currentDate, parsed.currentEntries)
+      }
+      merged.sort((a, b) => b.date.localeCompare(a.date))
+      localStorage.setItem('vct-history', JSON.stringify(merged))
+      return merged
+    })
+    if (parsed.currentDate === now && Array.isArray(parsed.currentEntries)) {
+      setEntries(prev => {
+        const byId = {}
+        ;[...parsed.currentEntries, ...prev].forEach(e => { if (e && e.id != null) byId[e.id] = e })
+        const merged = Object.values(byId)
+        localStorage.setItem(`vct-day-${now}`, JSON.stringify(merged))
+        return merged
+      })
+    }
+    if (typeof parsed.goal === 'number') { setGoal(parsed.goal); localStorage.setItem('vct-goal', JSON.stringify(parsed.goal)) }
+    if (parsed.micSide) { setMicSide(parsed.micSide); localStorage.setItem('vct-mic-side', JSON.stringify(parsed.micSide)) }
+    if (parsed.lang) { setLang(parsed.lang); localStorage.setItem('vct-lang', JSON.stringify(parsed.lang)) }
+    // Bump timestamp so the restored data wins the next reconcile and syncs up.
+    localStorage.setItem('vct-updated-at', JSON.stringify(Date.now()))
+  }, [])
+
   // Track the auth session.
   useEffect(() => {
     if (!SUPA_ON) return
@@ -461,6 +508,8 @@ export default function App() {
         userEmail={session?.user?.email}
         micPreauth={micPreauth}
         onMicPreauthChange={handleMicPreauthChange}
+        onExport={handleExportData}
+        onImport={handleImportData}
       />
     )
   }

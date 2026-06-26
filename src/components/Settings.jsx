@@ -1,10 +1,35 @@
 import { useState } from 'react'
 
-export default function Settings({ apiKey, goal, micSide = 'right', onMicSideChange, onSave, onClose, onSignOut, userEmail, micPreauth, onMicPreauthChange }) {
+export default function Settings({ apiKey, goal, micSide = 'right', onMicSideChange, onSave, onClose, onSignOut, userEmail, micPreauth, onMicPreauthChange, onExport, onImport }) {
   const [key, setKey] = useState(apiKey || '')
   const [goalValue, setGoalValue] = useState(String(goal))
   const [error, setError] = useState('')
   const [micStatus, setMicStatus] = useState(null) // null | 'granted' | 'denied'
+  const [importMsg, setImportMsg] = useState('')
+  const [importOk, setImportOk] = useState(false)
+
+  const handleImportFile = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-importing the same file later
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result)
+        if (!parsed || typeof parsed !== 'object' || (!Array.isArray(parsed.history) && !Array.isArray(parsed.currentEntries))) {
+          throw new Error('Not a valid backup file.')
+        }
+        onImport(parsed)
+        const days = parsed.history?.length || 0
+        setImportOk(true)
+        setImportMsg(`Restored ${days} day${days === 1 ? '' : 's'} of history.`)
+      } catch (err) {
+        setImportOk(false)
+        setImportMsg(err.message === 'Not a valid backup file.' ? err.message : 'Could not read that file — is it a backup export?')
+      }
+    }
+    reader.readAsText(file)
+  }
 
   const handleSave = () => {
     const trimmed = key.trim()
@@ -129,6 +154,30 @@ export default function Settings({ apiKey, goal, micSide = 'right', onMicSideCha
         >
           Save
         </button>
+
+        {(onExport || onImport) && (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <label className="text-sm font-bold text-slate-700 block mb-1">Backup &amp; restore</label>
+            <p className="text-xs text-slate-400 mb-3">Save all your entries to a file, or restore from one. Your API key is never included. Keep a copy somewhere safe.</p>
+            <div className="flex gap-2">
+              {onExport && (
+                <button
+                  onClick={onExport}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
+                >
+                  Export
+                </button>
+              )}
+              {onImport && (
+                <label className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all text-center cursor-pointer">
+                  Import
+                  <input type="file" accept="application/json,.json" onChange={handleImportFile} className="hidden" />
+                </label>
+              )}
+            </div>
+            {importMsg && <p className={`text-xs mt-2 ${importOk ? 'text-green-700' : 'text-violet-600'}`}>{importMsg}</p>}
+          </div>
+        )}
 
         {onSignOut && (
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
