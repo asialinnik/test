@@ -252,16 +252,29 @@ export default function App() {
     if (!SUPA_ON || !session) return
     let cancelled = false
     ;(async () => {
-      const remote = await pullRemote(session.user.id)
+      let remote
+      try {
+        remote = await pullRemote(session.user.id)
+      } catch {
+        // Cloud read failed — do NOT push, or we risk clobbering good cloud
+        // data with whatever happens to be in local state right now.
+        if (!cancelled) setInitialSync(true)
+        return
+      }
       if (cancelled) return
       const localUpdated = loadFromStorage('vct-updated-at', 0)
       if (remote && (remote.updatedAt || 0) >= localUpdated) {
         applyBlob(remote)
       } else {
         const blob = gatherBlob()
-        lastSyncedRef.current = blobSignature(blob)
-        localStorage.setItem('vct-updated-at', JSON.stringify(blob.updatedAt))
-        await pushRemote(session.user.id, blob)
+        // Only push if there's actually something local worth keeping. Pushing
+        // an empty blob here is how a fresh/evicted load wipes the cloud.
+        const hasLocalData = blob.currentEntries.length > 0 || blob.history.length > 0
+        if (hasLocalData) {
+          lastSyncedRef.current = blobSignature(blob)
+          localStorage.setItem('vct-updated-at', JSON.stringify(blob.updatedAt))
+          await pushRemote(session.user.id, blob)
+        }
       }
       setInitialSync(true)
     })()
@@ -274,10 +287,16 @@ export default function App() {
     if (!SUPA_ON || !session || !initialSync) return
     const blob = gatherBlob()
     if (blobSignature(blob) === lastSyncedRef.current) return
+    // Never let a totally-empty state propagate a wipe to the cloud (and from
+    // there to every other device). There's nothing to sync anyway.
+    if (blob.currentEntries.length === 0 && blob.history.length === 0) return
     clearTimeout(pushTimerRef.current)
     pushTimerRef.current = setTimeout(() => {
       lastSyncedRef.current = blobSignature(blob)
       localStorage.setItem('vct-updated-at', JSON.stringify(blob.updatedAt))
+      // Keep an on-device backup of the last non-empty state we synced, so a
+      // bad pull/overwrite is recoverable from this device.
+      localStorage.setItem('vct-backup', JSON.stringify(blob))
       pushRemote(session.user.id, blob)
     }, 800)
     return () => clearTimeout(pushTimerRef.current)
@@ -288,7 +307,12 @@ export default function App() {
     if (!SUPA_ON || !session) return
     const refresh = async () => {
       if (document.hidden) return
-      const remote = await pullRemote(session.user.id)
+      let remote
+      try {
+        remote = await pullRemote(session.user.id)
+      } catch {
+        return // transient read failure — leave local data untouched
+      }
       if (remote && (remote.updatedAt || 0) > loadFromStorage('vct-updated-at', 0)) {
         applyBlob(remote)
       }

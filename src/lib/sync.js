@@ -2,7 +2,10 @@ import { supabase } from './supabase'
 
 const TABLE = 'app_data'
 
-// Fetch the user's stored blob, or null if none / on error.
+// Fetch the user's stored blob. Returns null ONLY when the read succeeded and
+// there is genuinely no cloud row yet. THROWS on any failure (network, auth,
+// RLS, timeout) so callers never mistake "couldn't read" for "cloud is empty"
+// and overwrite good cloud data with an empty local state.
 export async function pullRemote(userId) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -11,7 +14,7 @@ export async function pullRemote(userId) {
     .maybeSingle()
   if (error) {
     console.error('Sync pull failed:', error.message)
-    return null
+    throw new Error(error.message)
   }
   return data?.data ?? null
 }
